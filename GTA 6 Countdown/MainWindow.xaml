@@ -1,0 +1,450 @@
+﻿<Window x:Class="GTA_6_Countdown.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="GTA VI Countdown"
+        Width="400"
+        Height="280"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Topmost="True"
+        AllowsTransparency="True"
+        Background="Transparent"
+        MouseDown="Window_MouseDown">
+
+        <Window.Resources>
+                <!-- GTA VI Pink/Purple Gradient (matching the marketing image) -->
+                <LinearGradientBrush x:Key="CountdownGradient"
+                                     StartPoint="0,0"
+                                     EndPoint="0,1">
+                        <GradientStop Color="#FF355FD9"
+                                      Offset="0"/>
+                        <!-- Top: Blue -->
+                        <GradientStop Color="#FFFC53AD"
+                                      Offset="0.5"/>
+                        <!-- Middle: Pink -->
+                        <GradientStop Color="#FFE89243"
+                                      Offset="1"/>
+                        <!-- Bottom: Orange -->
+                </LinearGradientBrush>
+
+                <!-- Vice City Sky Gradient Background -->
+                <LinearGradientBrush x:Key="ViceCitySkyGradient"
+                                     StartPoint="0,0"
+                                     EndPoint="0,1">
+                        <GradientStop Color="#FF2D1B69"
+                                      Offset="0"/>
+                        <!-- Deep Purple -->
+                        <GradientStop Color="#FF4A1E7B"
+                                      Offset="0.2"/>
+                        <!-- Purple -->
+                        <GradientStop Color="#FF7B2D8E"
+                                      Offset="0.4"/>
+                        <!-- Purple-Pink -->
+                        <GradientStop Color="#FFFF6B9D"
+                                      Offset="0.7"/>
+                        <!-- Pink -->
+                        <GradientStop Color="#FFFF8C42"
+                                      Offset="0.9"/>
+                        <!-- Orange -->
+                        <GradientStop Color="#FFFFA726"
+                                      Offset="1"/>
+                        <!-- Warm Orange -->
+                </LinearGradientBrush>
+
+                <!-- GTA Fonts -->
+                <FontFamily x:Key="GTAFont">Arial Black</FontFamily>
+                <FontFamily x:Key="GTAFontMedium">Arial Black</FontFamily>
+
+                <!-- Dark Context Menu Style (PureRef-inspired) -->
+                <Style x:Key="DarkContextMenuStyle"
+                       TargetType="ContextMenu">
+                        <Setter Property="Background"
+                                Value="#FF2B2B2B"/>
+                        <Setter Property="BorderBrush"
+                                Value="#FF404040"/>
+                        <Setter Property="BorderThickness"
+                                Value="1"/>
+                        <Setter Property="Padding"
+                                Value="4"/>
+                        <Setter Property="Template">
+                                <Setter.Value>
+                                        <ControlTemplate TargetType="ContextMenu">
+                                                <Border Background="{TemplateBinding Background}"
+                                                        BorderBrush="{TemplateBinding BorderBrush}"
+                                                        BorderThickness="{TemplateBinding BorderThickness}"
+                                                        CornerRadius="8"
+                                                        Padding="{TemplateBinding Padding}">
+                                                        <Border.Effect>
+                                                                <DropShadowEffect Color="Black"
+                                                                                  Direction="270"
+                                                                                  ShadowDepth="4"
+                                                                                  Opacity="0.3"
+                                                                                  BlurRadius="8"/>
+                                                        </Border.Effect>
+                                                        <StackPanel IsItemsHost="True"
+                                                                    KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                                                </Border>
+                                        </ControlTemplate>
+                                </Setter.Value>
+                        </Setter>
+                </Style>
+
+                <!-- Dark MenuItem Style -->
+                <Style x:Key="DarkMenuItemStyle"
+                       TargetType="MenuItem">
+                        <Setter Property="Background"
+                                Value="Transparent"/>
+                        <Setter Property="Foreground"
+                                Value="#FFEEEEEE"/>
+                        <Setter Property="FontSize"
+                                Value="12"/>
+                        <Setter Property="FontFamily"
+                                Value="Segoe UI"/>
+                        <Setter Property="Padding"
+                                Value="8,4"/>
+                        <Setter Property="Margin"
+                                Value="1"/>
+                        <Setter Property="Template">
+                                <Setter.Value>
+                                        <ControlTemplate TargetType="MenuItem">
+                                                <Border x:Name="Border"
+                                                        Background="{TemplateBinding Background}"
+                                                        BorderThickness="0"
+                                                        CornerRadius="4"
+                                                        Padding="{TemplateBinding Padding}">
+                                                        <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="*"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                        <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+
+                                                                <!-- Check mark -->
+                                                                <TextBlock x:Name="CheckMark"
+                                                                           Grid.Column="0"
+                                                                           Text="✓"
+                                                                           Foreground="#FF4A9EFF"
+                                                                           FontWeight="Bold"
+                                                                           Margin="0,0,6,0"
+                                                                           Visibility="Collapsed"/>
+
+                                                                <!-- Header -->
+                                                                <ContentPresenter x:Name="HeaderHost"
+                                                                                  Grid.Column="1"
+                                                                                  ContentSource="Header"
+                                                                                  RecognizesAccessKey="True"
+                                                                                  VerticalAlignment="Center"/>
+
+                                                                <!-- Submenu arrow -->
+                                                                <TextBlock x:Name="Arrow"
+                                                                           Grid.Column="3"
+                                                                           Text="▶"
+                                                                           Foreground="#FFAAAAAA"
+                                                                           FontSize="10"
+                                                                           Margin="8,0,0,0"
+                                                                           VerticalAlignment="Center"
+                                                                           Visibility="Collapsed"/>
+
+                                                                <!-- Submenu popup -->
+                                                                <Popup x:Name="SubMenuPopup"
+                                                                       Placement="Right"
+                                                                       IsOpen="{Binding Path=IsSubmenuOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                                                       AllowsTransparency="True"
+                                                                       Focusable="False"
+                                                                       PopupAnimation="Slide">
+                                                                        <Border Background="#FF2B2B2B"
+                                                                                BorderBrush="#FF404040"
+                                                                                BorderThickness="1"
+                                                                                CornerRadius="8"
+                                                                                Padding="4">
+                                                                                <Border.Effect>
+                                                                                        <DropShadowEffect Color="Black"
+                                                                                                          Direction="270"
+                                                                                                          ShadowDepth="4"
+                                                                                                          Opacity="0.3"
+                                                                                                          BlurRadius="8"/>
+                                                                                </Border.Effect>
+                                                                                <StackPanel IsItemsHost="True"
+                                                                                            KeyboardNavigation.DirectionalNavigation="Cycle"/>
+                                                                        </Border>
+                                                                </Popup>
+                                                        </Grid>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                        <Trigger Property="IsChecked"
+                                                                 Value="True">
+                                                                <Setter TargetName="CheckMark"
+                                                                        Property="Visibility"
+                                                                        Value="Visible"/>
+                                                        </Trigger>
+                                                        <Trigger Property="HasItems"
+                                                                 Value="True">
+                                                                <Setter TargetName="Arrow"
+                                                                        Property="Visibility"
+                                                                        Value="Visible"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsHighlighted"
+                                                                 Value="True">
+                                                                <Setter TargetName="Border"
+                                                                        Property="Background"
+                                                                        Value="#FF404040"/>
+                                                        </Trigger>
+                                                        <Trigger Property="IsEnabled"
+                                                                 Value="False">
+                                                                <Setter Property="Foreground"
+                                                                        Value="#FF666666"/>
+                                                        </Trigger>
+                                                </ControlTemplate.Triggers>
+                                        </ControlTemplate>
+                                </Setter.Value>
+                        </Setter>
+                </Style>
+
+                <!-- Dark Separator Style -->
+                <Style x:Key="DarkSeparatorStyle"
+                       TargetType="Separator">
+                        <Setter Property="Background"
+                                Value="#FF404040"/>
+                        <Setter Property="Height"
+                                Value="1"/>
+                        <Setter Property="Margin"
+                                Value="8,4"/>
+                </Style>
+        </Window.Resources>
+
+        <Window.ContextMenu>
+                <ContextMenu Style="{StaticResource DarkContextMenuStyle}">
+                        <MenuItem Header="Style"
+                                  Style="{StaticResource DarkMenuItemStyle}">
+                                <MenuItem Header="Simple View"
+                                          Click="SetSimpleView_Click"
+                                          x:Name="SimpleViewMenuItem"
+                                          IsChecked="True"
+                                          Style="{StaticResource DarkMenuItemStyle}"/>
+                                <MenuItem Header="Full View"
+                                          Click="SetFullView_Click"
+                                          x:Name="FullViewMenuItem"
+                                          Style="{StaticResource DarkMenuItemStyle}"/>
+                        </MenuItem>
+                        <MenuItem Header="Mode"
+                                  Style="{StaticResource DarkMenuItemStyle}">
+                                <MenuItem Header="Always on top"
+                                          Click="SetAlwaysOnTop_Click"
+                                          x:Name="AlwaysOnTopMenuItem"
+                                          IsCheckable="True"
+                                          IsChecked="True"
+                                          Style="{StaticResource DarkMenuItemStyle}"/>
+                                <MenuItem Header="Normal window"
+                                          Click="SetNormalWindow_Click"
+                                          x:Name="NormalWindowMenuItem"
+                                          IsCheckable="True"
+                                          Style="{StaticResource DarkMenuItemStyle}"/>
+                                <MenuItem Header="Always on bottom"
+                                          Click="SetAlwaysOnBottom_Click"
+                                          x:Name="AlwaysOnBottomMenuItem"
+                                          IsCheckable="True"
+                                          Style="{StaticResource DarkMenuItemStyle}"/>
+                        </MenuItem>
+                        <Separator Style="{StaticResource DarkSeparatorStyle}"/>
+                        <MenuItem Header="Check for Updates"
+                                  Click="CheckForUpdates_Click"
+                                  Style="{StaticResource DarkMenuItemStyle}"/>
+                        <MenuItem Header="Exit"
+                                  Click="ExitApplication_Click"
+                                  Style="{StaticResource DarkMenuItemStyle}"/>
+                </ContextMenu>
+        </Window.ContextMenu>
+
+        <Grid>
+                <!-- Full View Content -->
+                <Grid x:Name="FullViewGrid">
+                        <Border Background="{StaticResource ViceCitySkyGradient}"
+                                CornerRadius="20"
+                                Padding="24"
+                                BorderBrush="{StaticResource CountdownGradient}"
+                                BorderThickness="3">
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                        <!-- Title -->
+                                        <TextBlock Text="GTA VI LAUNCH!"
+                                                   FontFamily="{StaticResource GTAFont}"
+                                                   FontSize="28"
+                                                   FontWeight="Black"
+                                                   Foreground="White"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,0,0,12"/>
+
+                                        <!-- Countdown Row -->
+                                        <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+
+                                                <!-- Days -->
+                                                <StackPanel Grid.Column="0"
+                                                            HorizontalAlignment="Center">
+                                                        <TextBlock x:Name="DaysText"
+                                                                   FontFamily="{StaticResource GTAFontMedium}"
+                                                                   FontSize="35"
+                                                                   FontWeight="Black"
+                                                                   Foreground="White"
+                                                                   Text="000"
+                                                                   HorizontalAlignment="Center"/>
+                                                        <TextBlock Text="DAYS"
+                                                                   FontFamily="{StaticResource GTAFont}"
+                                                                   FontSize="13"
+                                                                   Foreground="#FFCCCCCC"
+                                                                   FontWeight="Bold"
+                                                                   HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1"
+                                                           Text=":"
+                                                           FontSize="36"
+                                                           Foreground="White"
+                                                           VerticalAlignment="Top"
+                                                           Margin="8,14,8,0"/>
+                                                <!-- Hours -->
+                                                <StackPanel Grid.Column="2"
+                                                            HorizontalAlignment="Center">
+                                                        <TextBlock x:Name="HoursText"
+                                                                   FontFamily="{StaticResource GTAFontMedium}"
+                                                                   FontSize="35"
+                                                                   FontWeight="Black"
+                                                                   Foreground="White"
+                                                                   Text="00"
+                                                                   HorizontalAlignment="Center"/>
+                                                        <TextBlock Text="HOURS"
+                                                                   FontFamily="{StaticResource GTAFont}"
+                                                                   FontSize="13"
+                                                                   Foreground="#FFCCCCCC"
+                                                                   FontWeight="Bold"
+                                                                   HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="3"
+                                                           Text=":"
+                                                           FontSize="36"
+                                                           Foreground="White"
+                                                           VerticalAlignment="Top"
+                                                           Margin="8,14,8,0"/>
+                                                <!-- Minutes -->
+                                                <StackPanel Grid.Column="4"
+                                                            HorizontalAlignment="Center">
+                                                        <TextBlock x:Name="MinutesText"
+                                                                   FontFamily="{StaticResource GTAFontMedium}"
+                                                                   FontSize="35"
+                                                                   FontWeight="Black"
+                                                                   Foreground="White"
+                                                                   Text="00"
+                                                                   HorizontalAlignment="Center"/>
+                                                        <TextBlock Text="MIN"
+                                                                   FontFamily="{StaticResource GTAFont}"
+                                                                   FontSize="13"
+                                                                   Foreground="#FFCCCCCC"
+                                                                   FontWeight="Bold"
+                                                                   HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="5"
+                                                           Text=":"
+                                                           FontSize="36"
+                                                           Foreground="White"
+                                                           VerticalAlignment="Top"
+                                                           Margin="8,14,8,0"/>
+                                                <!-- Seconds -->
+                                                <StackPanel Grid.Column="6"
+                                                            HorizontalAlignment="Center">
+                                                        <TextBlock x:Name="SecondsText"
+                                                                   FontFamily="{StaticResource GTAFontMedium}"
+                                                                   FontSize="35"
+                                                                   FontWeight="Black"
+                                                                   Foreground="White"
+                                                                   Text="00"
+                                                                   HorizontalAlignment="Center"/>
+                                                        <TextBlock Text="SEC"
+                                                                   FontFamily="{StaticResource GTAFont}"
+                                                                   FontSize="13"
+                                                                   Foreground="#FFCCCCCC"
+                                                                   FontWeight="Bold"
+                                                                   HorizontalAlignment="Center"/>
+                                                </StackPanel>
+                                        </Grid>
+
+                                        <!-- Release Date -->
+                                        <TextBlock Text="RELEASE DATE:"
+                                                   FontFamily="{StaticResource GTAFont}"
+                                                   FontSize="13"
+                                                   Foreground="White"
+                                                   Margin="0,0,0,4"
+                                                   HorizontalAlignment="Center"/>
+                                        <TextBlock Text="May 26, 2026"
+                                                   FontFamily="{StaticResource GTAFontMedium}"
+                                                   FontSize="18"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"
+                                                   Margin="0,0,0,4"
+                                                   HorizontalAlignment="Center"/>
+
+                                        <!-- Subtext -->
+                                        <TextBlock Text="The official countdown to Grand Theft Auto VI's release."
+                                                   FontFamily="{StaticResource GTAFont}"
+                                                   FontSize="11"
+                                                   Foreground="#FFCCCCCC"
+                                                   TextAlignment="Center"
+                                                   TextWrapping="Wrap"
+                                                   Margin="10,5,10,0"/>
+                                </StackPanel>
+                        </Border>
+                </Grid>
+
+                <!-- Simple View Content (Initially Hidden) -->
+                <Grid x:Name="SimpleViewGrid"
+                      Visibility="Collapsed">
+                        <Border Background="{StaticResource ViceCitySkyGradient}"
+                                CornerRadius="20"
+                                Padding="20"
+                                BorderBrush="{StaticResource CountdownGradient}"
+                                BorderThickness="3">
+                                <StackPanel HorizontalAlignment="Center"
+                                            VerticalAlignment="Center">
+                                        <TextBlock Text="GTA VI"
+                                                   FontFamily="{StaticResource GTAFont}"
+                                                   FontSize="24"
+                                                   FontWeight="Black"
+                                                   Foreground="White"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,0,0,8"/>
+
+                                        <TextBlock x:Name="SimpleDaysText"
+                                                   FontFamily="{StaticResource GTAFontMedium}"
+                                                   FontSize="50"
+                                                   FontWeight="Black"
+                                                   Foreground="White"
+                                                   Text="000"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,0,0,8"/>
+
+                                        <TextBlock Text="DAYS"
+                                                   FontFamily="{StaticResource GTAFont}"
+                                                   FontSize="16"
+                                                   Foreground="#FFCCCCCC"
+                                                   FontWeight="Bold"
+                                                   HorizontalAlignment="Center"/>
+
+                                        <TextBlock Text="May 26, 2026"
+                                                   FontFamily="{StaticResource GTAFontMedium}"
+                                                   FontSize="13"
+                                                   FontWeight="Bold"
+                                                   Foreground="White"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="0,8,0,0"/>
+                                </StackPanel>
+                        </Border>
+                </Grid>
+        </Grid>
+</Window>
