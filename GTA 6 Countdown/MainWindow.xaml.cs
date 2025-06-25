@@ -1,26 +1,13 @@
 using System;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Interop;
 using System.Windows.Threading;
-using GTA_6_Countdown.Services;
 
 namespace GTA_6_Countdown
 {
     public partial class MainWindow : Window
     {
-        // Windows API declarations for window positioning
-        [DllImport("user32.dll")]
-        private static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags); private static readonly IntPtr HWND_TOPMOST = new IntPtr(-1);
-        private static readonly IntPtr HWND_NOTOPMOST = new IntPtr(-2);
-        private static readonly IntPtr HWND_BOTTOM = new IntPtr(1);
-
-        private const uint SWP_NOMOVE = 0x0002;
-        private const uint SWP_NOSIZE = 0x0001;
-        private const uint SWP_SHOWWINDOW = 0x0040;
-
         private readonly DateTime gta6ReleaseDate = new DateTime(2026, 5, 26);
         private bool isSimpleView = false;
 
@@ -34,9 +21,6 @@ namespace GTA_6_Countdown
                 SetToSimpleView();
 
                 StartCountdown();
-
-                // Check for updates on startup (async, don't block UI)
-                _ = Task.Run(CheckForUpdatesAsync);
             }
             catch (Exception ex)
             {
@@ -184,16 +168,13 @@ namespace GTA_6_Countdown
             isSimpleView = true;
         }
 
-        // Mode functionality - similar to PureRef
+        // Mode functionality - window positioning methods
         private void SetAlwaysOnTop_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 this.Topmost = true;
-                UpdateModeMenuItems("AlwaysOnTop");
-
-                var hwnd = new WindowInteropHelper(this).Handle;
-                SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+                Console.WriteLine("Window set to always on top");
             }
             catch (Exception ex)
             {
@@ -206,10 +187,7 @@ namespace GTA_6_Countdown
             try
             {
                 this.Topmost = false;
-                UpdateModeMenuItems("Normal");
-
-                var hwnd = new WindowInteropHelper(this).Handle;
-                SetWindowPos(hwnd, HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+                Console.WriteLine("Window set to normal");
             }
             catch (Exception ex)
             {
@@ -222,64 +200,11 @@ namespace GTA_6_Countdown
             try
             {
                 this.Topmost = false;
-                UpdateModeMenuItems("AlwaysOnBottom");
-
-                var hwnd = new WindowInteropHelper(this).Handle;
-                SetWindowPos(hwnd, HWND_BOTTOM, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+                Console.WriteLine("Window set to always on bottom");
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error setting always on bottom: {ex.Message}", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void UpdateModeMenuItems(string activeMode)
-        {
-            AlwaysOnTopMenuItem.IsChecked = activeMode == "AlwaysOnTop";
-            NormalWindowMenuItem.IsChecked = activeMode == "Normal";
-            AlwaysOnBottomMenuItem.IsChecked = activeMode == "AlwaysOnBottom";
-        }
-
-        // Update functionality
-        private async Task CheckForUpdatesAsync()
-        {
-            try
-            {
-                var (hasUpdate, release) = await UpdateService.CheckForUpdateAsync();
-                if (hasUpdate && release != null)
-                {
-                    // Show update notification on UI thread
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        UpdateService.ShowUpdateDialog(release);
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error checking for updates: {ex.Message}");
-            }
-        }
-
-        private async void CheckForUpdates_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var (hasUpdate, release) = await UpdateService.CheckForUpdateAsync();
-                if (hasUpdate && release != null)
-                {
-                    UpdateService.ShowUpdateDialog(release);
-                }
-                else
-                {
-                    MessageBox.Show($"You are running the latest version ({UpdateService.GetCurrentVersion()})",
-                        "No Updates", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error checking for updates: {ex.Message}", "Update Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
