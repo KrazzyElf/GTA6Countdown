@@ -11,11 +11,17 @@
     <AssemblyVersion>1.1.0.0</AssemblyVersion>
     <FileVersion>1.1.0.0</FileVersion>
     <ApplicationIcon>Images\GTA6Logo.ico</ApplicationIcon>
+    <AssemblyTitle>GTA 6 Countdown</AssemblyTitle>
+    <Product>GTA 6 Countdown</Product>
+    <Company>KrazzyElf</Company>
+    <Copyright>Copyright © KrazzyElf 2025</Copyright>
+    <Description>A stylish countdown timer for GTA 6's release</Description>
   </PropertyGroup>
 
   <ItemGroup>
     <Resource Include="Fonts\*.otf" />
     <Resource Include="Images\*.png" />
+    <Content Include="Images\GTA6Logo.ico" />
   </ItemGroup>
 
 </Project>
