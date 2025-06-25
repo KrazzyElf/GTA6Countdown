@@ -1,8 +1,9 @@
 [Setup]
 AppName=GTA 6 Countdown
-AppVersion=1.0.0
-DefaultDirName={pf}\GTA 6 Countdown
+AppVersion=1.1.0
+DefaultDirName={commonpf}\GTA 6 Countdown
 DefaultGroupName=GTA 6 Countdown
+PrivilegesRequired=lowest
 OutputDir=Release
 OutputBaseFilename=GTA6CountdownSetup
 SetupIconFile=Images\GTA6Logo.ico
